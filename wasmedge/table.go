@@ -10,8 +10,9 @@ type Table struct {
 func NewTable(rtype RefType, lim *Limit) *Table {
 	climit := C.WasmEdge_Limit{HasMax: C.bool(lim.hasmax), Min: C.uint32_t(lim.min), Max: C.uint32_t(lim.max)}
 	crtype := C.enum_WasmEdge_RefType(rtype)
+	var tabTypeCxt *C.WasmEdge_TableTypeContext = C.WasmEdge_TableTypeCreate(crtype, climit)
 	self := &Table{
-		_inner: C.WasmEdge_TableInstanceCreate(crtype, climit),
+		_inner: C.WasmEdge_TableInstanceCreate(tabTypeCxt),
 	}
 	if self._inner == nil {
 		return nil
@@ -20,7 +21,8 @@ func NewTable(rtype RefType, lim *Limit) *Table {
 }
 
 func (self *Table) GetRefType() RefType {
-	return RefType(C.WasmEdge_TableInstanceGetRefType(self._inner))
+	tabTypeCxt := C.WasmEdge_TableInstanceGetTableType(self._inner);
+	return RefType(C.WasmEdge_TableTypeGetRefType(tabTypeCxt))
 }
 
 func (self *Table) GetData(off uint) (interface{}, error) {

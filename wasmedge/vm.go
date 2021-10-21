@@ -269,7 +269,10 @@ func (self *VM) ExecuteBindgenRegistered(modname string, funcname string, rettyp
 func (self *VM) GetFunctionType(funcname string) *FunctionType {
 	funcstr := toWasmEdgeStringWrap(funcname)
 	cftype := C.WasmEdge_VMGetFunctionType(self._inner, funcstr)
-	defer C.WasmEdge_FunctionTypeDelete(cftype)
+	/// The returned function type context are linked to the context owned by the VM
+	/// context, and the caller should __NOT__ call the
+	/// `WasmEdge_FunctionTypeDelete` to delete it.
+	// defer C.WasmEdge_FunctionTypeDelete(cftype)
 	return fromWasmEdgeFunctionType(cftype)
 }
 

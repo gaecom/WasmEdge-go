@@ -18,7 +18,7 @@ import (
 )
 
 type HostFunction struct {
-	_inner *C.WasmEdge_HostFunctionContext
+	_inner *C.WasmEdge_FunctionInstanceContext
 	_index uint
 }
 
@@ -120,7 +120,7 @@ func NewHostFunction(functype *FunctionType, fn hostFunctionSignature, cost uint
 	}
 
 	self._index = hostfuncMgr.add(fn)
-	chostfunc := C.WasmEdge_HostFunctionCreateBinding(cftype, C.wasmedgego_HostFuncWrapper(C.wasmedgego_HostFuncInvoke), unsafe.Pointer(uintptr(self._index)), C.uint64_t(cost))
+	chostfunc := C.WasmEdge_FunctionInstanceCreateBinding(cftype, C.wasmedgego_HostFuncWrapper(C.wasmedgego_HostFuncInvoke), unsafe.Pointer(uintptr(self._index)), nil, C.uint64_t(cost))
 	if chostfunc == nil {
 		hostfuncMgr.del(self._index)
 		return nil
@@ -131,7 +131,7 @@ func NewHostFunction(functype *FunctionType, fn hostFunctionSignature, cost uint
 
 func (self *HostFunction) Delete() {
 	if self._inner != nil {
-		C.WasmEdge_HostFunctionDelete(self._inner)
+		C.WasmEdge_FunctionInstanceDelete(self._inner)
 		self._inner = nil
 		hostfuncMgr.del(self._index)
 	}

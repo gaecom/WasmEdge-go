@@ -39,7 +39,10 @@ func (self *Store) getExports(exportlen C.uint32_t, getfunc interface{}, modname
 	names := make([]string, int(exportlen))
 	for i := 0; i < int(exportlen); i++ {
 		names[i] = fromWasmEdgeString(cnames[i])
-		C.WasmEdge_StringDelete(cnames[i])
+		/// The returned memory names filled into the `Names` array are linked to the
+		/// exported names of memories in the store context, and the caller should
+		/// __NOT__ call the `WasmEdge_StringDelete`.
+		// C.WasmEdge_StringDelete(cnames[i])
 	}
 	return names
 }

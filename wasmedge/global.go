@@ -9,8 +9,9 @@ type Global struct {
 
 func NewGlobal(val interface{}, vtype ValMut) *Global {
 	cval := toWasmEdgeValue(val)
+	var globTypeCxt *C.WasmEdge_GlobalTypeContext = C.WasmEdge_GlobalTypeCreate(cval.Type, C.enum_WasmEdge_Mutability(vtype));
 	self := &Global{
-		_inner: C.WasmEdge_GlobalInstanceCreate(cval, C.enum_WasmEdge_Mutability(vtype)),
+		_inner: C.WasmEdge_GlobalInstanceCreate(globTypeCxt, cval),
 	}
 	if self._inner == nil {
 		return nil
@@ -19,11 +20,13 @@ func NewGlobal(val interface{}, vtype ValMut) *Global {
 }
 
 func (self *Global) GetValType() ValType {
-	return ValType(C.WasmEdge_GlobalInstanceGetValType(self._inner))
+	var globTypeCxt *C.WasmEdge_GlobalTypeContext = C.WasmEdge_GlobalInstanceGetGlobalType(self._inner);
+	return ValType(C.WasmEdge_GlobalTypeGetValType(globTypeCxt))
 }
 
 func (self *Global) GetMutability() ValMut {
-	return ValMut(C.WasmEdge_GlobalInstanceGetMutability(self._inner))
+	var globTypeCxt *C.WasmEdge_GlobalTypeContext = C.WasmEdge_GlobalInstanceGetGlobalType(self._inner);
+	return ValMut(C.WasmEdge_GlobalTypeGetMutability(globTypeCxt))
 }
 
 func (self *Global) GetValue() interface{} {

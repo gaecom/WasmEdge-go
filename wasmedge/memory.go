@@ -10,8 +10,9 @@ type Memory struct {
 
 func NewMemory(lim *Limit) *Memory {
 	climit := C.WasmEdge_Limit{HasMax: C.bool(lim.hasmax), Min: C.uint32_t(lim.min), Max: C.uint32_t(lim.max)}
+	var memTypeCxt *C.WasmEdge_MemoryTypeContext = C.WasmEdge_MemoryTypeCreate(climit)
 	self := &Memory{
-		_inner: C.WasmEdge_MemoryInstanceCreate(climit),
+		_inner: C.WasmEdge_MemoryInstanceCreate(memTypeCxt),
 	}
 	if self._inner == nil {
 		return nil

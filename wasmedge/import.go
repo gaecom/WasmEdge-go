@@ -11,7 +11,7 @@ type ImportObject struct {
 
 func NewImportObject(modname string, additional interface{}) *ImportObject {
 	self := &ImportObject{
-		_inner: C.WasmEdge_ImportObjectCreate(toWasmEdgeStringWrap(modname), nil),
+		_inner: C.WasmEdge_ImportObjectCreate(toWasmEdgeStringWrap(modname)),
 		_data:  additional,
 	}
 	if self._inner == nil {
@@ -130,7 +130,7 @@ func (self *ImportObject) AddHostFunction(name string, inst *HostFunction) {
 	defer hostfuncMgr.mu.Unlock()
 	hostfuncMgr.data[inst._index] = self._data
 
-	C.WasmEdge_ImportObjectAddHostFunction(self._inner, toWasmEdgeStringWrap(name), inst._inner)
+	C.WasmEdge_ImportObjectAddFunction(self._inner, toWasmEdgeStringWrap(name), inst._inner)
 	self._hostfuncs = append(self._hostfuncs, inst._index)
 	inst._inner = nil
 }

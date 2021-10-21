@@ -4,13 +4,13 @@ package wasmedge
 import "C"
 import "unsafe"
 
-type Interpreter struct {
-	_inner *C.WasmEdge_InterpreterContext
+type Executor struct {
+	_inner *C.WasmEdge_ExecutorContext
 }
 
-func NewInterpreter() *Interpreter {
-	self := &Interpreter{
-		_inner: C.WasmEdge_InterpreterCreate(nil, nil),
+func NewExecutor() *Executor {
+	self := &Executor{
+		_inner: C.WasmEdge_ExecutorCreate(nil, nil),
 	}
 	if self._inner == nil {
 		return nil
@@ -18,9 +18,9 @@ func NewInterpreter() *Interpreter {
 	return self
 }
 
-func NewInterpreterWithConfig(conf *Configure) *Interpreter {
-	self := &Interpreter{
-		_inner: C.WasmEdge_InterpreterCreate(conf._inner, nil),
+func NewExecutorWithConfig(conf *Configure) *Executor {
+	self := &Executor{
+		_inner: C.WasmEdge_ExecutorCreate(conf._inner, nil),
 	}
 	if self._inner == nil {
 		return nil
@@ -28,9 +28,9 @@ func NewInterpreterWithConfig(conf *Configure) *Interpreter {
 	return self
 }
 
-func NewInterpreterWithStatistics(stat *Statistics) *Interpreter {
-	self := &Interpreter{
-		_inner: C.WasmEdge_InterpreterCreate(nil, stat._inner),
+func NewExecutorWithStatistics(stat *Statistics) *Executor {
+	self := &Executor{
+		_inner: C.WasmEdge_ExecutorCreate(nil, stat._inner),
 	}
 	if self._inner == nil {
 		return nil
@@ -38,9 +38,9 @@ func NewInterpreterWithStatistics(stat *Statistics) *Interpreter {
 	return self
 }
 
-func NewInterpreterWithConfigAndStatistics(conf *Configure, stat *Statistics) *Interpreter {
-	self := &Interpreter{
-		_inner: C.WasmEdge_InterpreterCreate(conf._inner, stat._inner),
+func NewExecutorWithConfigAndStatistics(conf *Configure, stat *Statistics) *Executor {
+	self := &Executor{
+		_inner: C.WasmEdge_ExecutorCreate(conf._inner, stat._inner),
 	}
 	if self._inner == nil {
 		return nil
@@ -48,32 +48,32 @@ func NewInterpreterWithConfigAndStatistics(conf *Configure, stat *Statistics) *I
 	return self
 }
 
-func (self *Interpreter) Instantiate(store *Store, ast *AST) error {
-	res := C.WasmEdge_InterpreterInstantiate(self._inner, store._inner, ast._inner)
+func (self *Executor) Instantiate(store *Store, ast *AST) error {
+	res := C.WasmEdge_ExecutorInstantiate(self._inner, store._inner, ast._inner)
 	if !C.WasmEdge_ResultOK(res) {
 		return newError(res)
 	}
 	return nil
 }
 
-func (self *Interpreter) RegisterImport(store *Store, imp *ImportObject) error {
-	res := C.WasmEdge_InterpreterRegisterImport(self._inner, store._inner, imp._inner)
+func (self *Executor) RegisterImport(store *Store, imp *ImportObject) error {
+	res := C.WasmEdge_ExecutorRegisterImport(self._inner, store._inner, imp._inner)
 	if !C.WasmEdge_ResultOK(res) {
 		return newError(res)
 	}
 	return nil
 }
 
-func (self *Interpreter) RegisterModule(store *Store, ast *AST, modname string) error {
+func (self *Executor) RegisterModule(store *Store, ast *AST, modname string) error {
 	modstr := toWasmEdgeStringWrap(modname)
-	res := C.WasmEdge_InterpreterRegisterModule(self._inner, store._inner, ast._inner, modstr)
+	res := C.WasmEdge_ExecutorRegisterModule(self._inner, store._inner, ast._inner, modstr)
 	if !C.WasmEdge_ResultOK(res) {
 		return newError(res)
 	}
 	return nil
 }
 
-func (self *Interpreter) Invoke(store *Store, funcname string, params ...interface{}) ([]interface{}, error) {
+func (self *Executor) Invoke(store *Store, funcname string, params ...interface{}) ([]interface{}, error) {
 	funcstr := toWasmEdgeStringWrap(funcname)
 	funccxt := store.FindFunction(funcname)
 	ftype := funccxt.GetFunctionType()
@@ -87,14 +87,14 @@ func (self *Interpreter) Invoke(store *Store, funcname string, params ...interfa
 	if len(creturns) > 0 {
 		ptrreturns = (*C.WasmEdge_Value)(unsafe.Pointer(&creturns[0]))
 	}
-	res := C.WasmEdge_InterpreterInvoke(self._inner, store._inner, funcstr, ptrparams, C.uint32_t(len(cparams)), ptrreturns, C.uint32_t(len(ftype._returns)))
+	res := C.WasmEdge_ExecutorInvoke(self._inner, store._inner, funcstr, ptrparams, C.uint32_t(len(cparams)), ptrreturns, C.uint32_t(len(ftype._returns)))
 	if !C.WasmEdge_ResultOK(res) {
 		return nil, newError(res)
 	}
 	return fromWasmEdgeValueSlide(creturns, ftype._returns), nil
 }
 
-func (self *Interpreter) InvokeRegistered(store *Store, modname string, funcname string, params ...interface{}) ([]interface{}, error) {
+func (self *Executor) InvokeRegistered(store *Store, modname string, funcname string, params ...interface{}) ([]interface{}, error) {
 	modstr := toWasmEdgeStringWrap(modname)
 	funcstr := toWasmEdgeStringWrap(funcname)
 	funccxt := store.FindFunctionRegistered(modname, funcname)
@@ -109,14 +109,14 @@ func (self *Interpreter) InvokeRegistered(store *Store, modname string, funcname
 	if len(creturns) > 0 {
 		ptrreturns = (*C.WasmEdge_Value)(unsafe.Pointer(&creturns[0]))
 	}
-	res := C.WasmEdge_InterpreterInvokeRegistered(self._inner, store._inner, modstr, funcstr, ptrparams, C.uint32_t(len(cparams)), ptrreturns, C.uint32_t(len(ftype._returns)))
+	res := C.WasmEdge_ExecutorInvokeRegistered(self._inner, store._inner, modstr, funcstr, ptrparams, C.uint32_t(len(cparams)), ptrreturns, C.uint32_t(len(ftype._returns)))
 	if !C.WasmEdge_ResultOK(res) {
 		return nil, newError(res)
 	}
 	return fromWasmEdgeValueSlide(creturns, ftype._returns), nil
 }
 
-func (self *Interpreter) Delete() {
-	C.WasmEdge_InterpreterDelete(self._inner)
+func (self *Executor) Delete() {
+	C.WasmEdge_ExecutorDelete(self._inner)
 	self._inner = nil
 }

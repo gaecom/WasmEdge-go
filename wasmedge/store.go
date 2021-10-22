@@ -202,7 +202,10 @@ func (self *Store) ListModule() []string {
 	names := make([]string, int(modlen))
 	for i := 0; i < int(modlen); i++ {
 		names[i] = fromWasmEdgeString(cnames[i])
-		C.WasmEdge_StringDelete(cnames[i])
+		/// The returned module names filled into the `Names` array are linked to the
+		/// registered module names in the store context, and the caller should __NOT__
+		/// call the `WasmEdge_StringDelete`.
+		// C.WasmEdge_StringDelete(cnames[i])
 	}
 	return names
 }

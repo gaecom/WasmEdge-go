@@ -299,7 +299,10 @@ func (self *VM) GetFunctionList() ([]string, []*FunctionType) {
 	ftypes := make([]*FunctionType, int(funclen))
 	for i := 0; i < int(funclen); i++ {
 		fnames[i] = fromWasmEdgeString(cfnames[i])
-		C.WasmEdge_StringDelete(cfnames[i])
+		/// The returned function names filled into the `Names` array link to the
+		/// exported names of functions owned by the vm context, and the caller should
+		/// __NOT__ call the `WasmEdge_StringDelete` to delete them.
+		// C.WasmEdge_StringDelete(cfnames[i])
 		ftypes[i] = fromWasmEdgeFunctionType(cftypes[i])
 		C.WasmEdge_FunctionTypeDelete(cftypes[i])
 	}
